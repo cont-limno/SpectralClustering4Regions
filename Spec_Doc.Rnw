@@ -33,11 +33,6 @@ library("maptools")
 The next step is setting your working directory to be the folder that contains the code and data. In order to use the functions and methods in this code you also need to call main.R file using source() command as follow.
 
 <<>>=
-getwd()
-plot(1)
-@
-
-<<>>=
 # Second generate data objects and load spectral clustering code
 source("GenerateHU12.R")
 source("main.R")
