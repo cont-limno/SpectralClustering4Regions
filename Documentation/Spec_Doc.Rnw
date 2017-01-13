@@ -33,8 +33,7 @@ library("maptools")
 The next step is setting your working directory to be the folder that contains the code and data. In order to use the functions and methods in this code you also need to call main.R file using source() command as follow.
 
 <<eval=FALSE>>=
-# Second Step set working Directory and load spectral clustering file
-setwd("C:\\Users\\FWL\\Dropbox\\Summer 2015\\Job\\Spectral Clustering")
+# Second load spectral clustering file
 source("main.R")
 @
 
