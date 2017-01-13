@@ -28,3 +28,559 @@ Although you only have to install the packages once, you will need to load them 
 > # First Load the necessary packages 
 > library("Matrix")
 > library("geigen")
+> library("rARPACK")
+> library(maps)
+> library(WDI)
+> library(RColorBrewer)
+> library("maptools")
+\end{Sinput}
+\end{Schunk}
+The next step is setting your working directory to be the folder that contains the code and data. In order to use the functions and methods in this code you also need to call main.R file using source() command as follow.
+
+\begin{Schunk}
+\begin{Sinput}
+> # Second Step set working Directory and load spectral clustering file
+> setwd("C:\\Users\\FWL\\Dropbox\\Summer 2015\\Job\\Spectral Clustering")
+> source("main.R")
+\end{Sinput}
+\end{Schunk}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section {Spectral Clustering }
+In this section, we describe how to do spectral clustering without deep understanding of the algorithm.
+
+\subsection {Generate the data}
+Like any other algorithm, spectral clustering needs some variable as input. Which includes:\\ 
+\begin{itemize}
+\item {\bf data}: An n by p matrix where n is number of observation(e.g.,\ HU12's) and p is the number of measurement for each observation(e.g.,\ natural geographical variables for each HU12).
+\item {\bf cluster.number:} Number of clusters.
+\item{\bf conMatrix}: Constraint matrix or contiguity matrix. 
+\item{\bf conFactor}: Contiguity constraint factor.
+\end{itemize}
+We can read the HU12 data by loading {\bf HU12SpectralClustering.RData} file. This file contains dataTerr, dataFW, and dataTerrFw as three option of data, latLong18876 which is the location of each observation on Map, and NB18876 the contiguity constraint data frame that can be used to build the conMatrix.
+
+\begin{Schunk}
+\begin{Sinput}
+> #Loading Data
+> load("HU12SpectralClustering.RData")
+\end{Sinput}
+\end{Schunk}
+After loading the Hu12SpectralClustering.RData, you can generate the input data for spectral clustering algorithm by calling generateData() function\footnote{For description of functions look at section 3.1 in this document}. For the sake of clarity we do a toy example in this document. Let consider we are interseted in Missouri state dataTerrFW's data.
+
+\begin{Schunk}
+\begin{Sinput}
+> # generate the input when we restrict the
+> # data to dataTerrFW's of state Missouri, 
+> # and no islands inculded.
+> input <- generateData(type= dataTerrFW, islandsIn = F,
++                     states = c("MO"),conFactor=1)
+\end{Sinput}
+\end{Schunk}
+In the above example we stored the output of generateData() in a variable called input.
+Know we are ready to run the spectral clustering methods.
+\subsection {Clustering}
+By using this code you have three options for doing the clustering. First, using one-step {\bf speCluster()} function which is easy and simple but slow. Second, using two-step approach by calling {\bf stepOne()} and {\bf stepTwo()} functions that give you the ability to check different size of clusters in shorter time. Finally,  {\bf step by step} approach, which is more complicated and needs some knowledge of Spectral clustering algorithm steps.To understand the difference between these three approaches we need to understand the spectral clustering algorithm.
+
+We can divide the algorithm to three parts as follow:
+
+{\bf Algorithm steps:}
+\begin{enumerate}
+\item {\bf Preprocess}\\
+{\bf Input:} data, conMatrix
+\begin{enumerate}
+\item Detecting the outliers and replace them with mean of data
+\item Using the principal component to reduce the dimension of parameters space.
+\end{enumerate}
+{\bf Output:} ConMatrix, outlier, dataAfterPC
+\item {\bf Main algorithm}\\
+{\bf Input:} ConMatrix, outlier, dataAfterPC, cluster.number(k)
+\begin{enumerate}
+\item Compute similarity matrix
+$$ S_{i,j}= exp(\frac{dist(x_i,x_j)}{2\sigma ^2})  $$
+Where $x_i$ and $x_j$ are row $i$ and $j$ of the data matrix, and  $\sigma$ is median of pairwise distance.Then 
+$$S=S\circ S_c$$
+where $S_c$ is contiguity matrix
+\item compute Laplacian matrix . 
+  \begin{enumerate}
+     
+    \item Diagonal matrix: $ d_{i,i}= \sum_{j=1}^{n} S_{i,j}$
+    \item Compute Laplacian matrix: $L= D^{-1}S$
+  \end{enumerate}
+\item Find $u_1$, $u_2$, $\ldots$,$u_k$, the k top eigenvectors of L, where k is the clustering.number. Form matrix $$ U = [u_1 \ldots u_k]$$
+\item clusters U in to k cluster using kmean algorithm.
+\item assign the original point  $x_i$ to cluster j if and only if  row i of matrix U was assigned to cluster j.
+\end{enumerate}
+{\bf Output:} clusters
+\item{\bf postprocess}
+\begin{enumerate}
+{\bf Input:} clusters, latLon, data
+\item{error computation}
+\begin{enumerate}
+\item compute Sum of Squired Between clusters SSB
+\item compute Sum of Squired within clusters SSW
+\end{enumerate}
+\item{Mapping}
+\end{enumerate}
+{\bf Output:} SSB, SSW, graphs
+\end{enumerate}
+Now we can explain the three approachs we introduced above. Lets get back to our toy example. 
+
+\begin{Schunk}
+\begin{Sinput}
+> input <- generateData(type= dataTerrFW, islandsIn = F,
++                     states = c("MO"),conFactor=1)
+\end{Sinput}
+\end{Schunk}
+
+
+{\bf Approach 1. speCluster()} \\
+%\begin{singlespace}
+\begin{itemize}
+\item {\bf 1.a ... 3.a} Use speCluster() function.\\
+\item {\bf 3.b} plot the results using mapping function\\
+
+\end{itemize}
+%\end{singlespace}
+\begin{Schunk}
+\begin{Sinput}
+> # 1.a ... 3.a using speCluster and stor the result in the results variable
+> results <- speCluster(data= input$data, conMatrix= 
++                         input$coMatrix, cluster.number=10)
+> summary(results)
+> results$SS
+> results$clusters
+> mapping( lat = input$latLong[,1],long=input$latLong[,2],
++          clusters= results$clusters)
+\end{Sinput}
+\end{Schunk}
+
+If you look at the steps 2.c and 2.d of the above algorithm, you can notice that the column size of U in 2.c is equal to the number of clusters in 2.d. For example if we want 10 clusters we only need to calculate first 10 eigenvecotrs and build U with 10 columns. But what if we want to check 20 clusters? We need to call the speClus function again from beginning. However if we calculated U with 20 columns then we could check all the clustering options less than 20 without going back and recalculate all the steps from beginning. This is the main idea behind the second approach.\\
+{\bf Approach 2. Two step} \\
+\begin{itemize}
+\item {\bf 1.a...2.C} using stepOne() function.
+\item {\bf 2.d... 3.a } using stepTwo() function.
+\item {\bf 3.b} plot the results using mapping function\\
+\end{itemize}
+\begin{Schunk}
+\begin{Sinput}
+> # example.2. Two steps
+> results1 <- stepOne(input$data, conMatrix= input$conMatrix,ncol=20)
+> summary(results1)
+> results2 <- stepTwo(data= results1$dataAfterPC, U = results1$U,
++                     cluster.number=10)
+> summary(results2)
+> results2$SS
+> mapping( lat = input$latLong[,1], long = input$latLong[,2],
++          clusters= results2$clusters)
+> # since the U matrix has 20 column we can to clustering up
+> # to 20 clusters using output of stepOne function
+> results22 <-  stepTwo(data= input$dataAfterPC, U = input$U,
++                        cluster.number=20)
+> results22$SS
+> mapping( lat = input$latLong[,1], long = input$latLong[,2],
++          clusters= results22$clusters)
+> 
+\end{Sinput}
+\end{Schunk}
+
+
+{\bf Approach 3.Step by Step} \\
+\begin{itemize}
+\item {\bf 1.a } Find the outlier using outlierDetector() function.\\
+\item {\bf 1.b} Reduce the data dimension using prinComp() function.\\
+\item {\bf 2.a } Compute similarity matrix using similarity() function.\\
+\item {\bf 2.b and 2.c} Compute Laplacian and then U matrix using produceU() function.\\
+\item {\bf 2.d and 2.e} Calculate the clusters using kmeansU() function.\\
+\item {\bf 3.a} Evaluate the between and within sum squired error using sumSquares() function.\\
+\item {\bf 3.b} plot the results using mapping() function.\\
+\end{itemize}
+\begin{Schunk}
+\begin{Sinput}
+> #Preprocess
+> 
+> outId <-outlierDetector( input$data )
+> dataAfterPC <- prinComp(data = input$data, outId = outId)
+> ############################################
+> # Spectral clustering Algorithm
+> similarity <- similarity(data = dataAfterPC, 
++                          neighbors=conMatrix)
+> U <- produceU( similarity= similarity, ncol=20)
+> clusters <- kmeansU(data=U, cluster.number = 10)
+> ############################################
+> # Resutls
+> SS <- sumSquares(data=dataAfterPC, clusters= clusters)
+> SS
+> mapping( lat = input$latLong[,1],long=input$latLong[,2], clusters= clusters)
+> 
+\end{Sinput}
+\end{Schunk}
+\newpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Functions
+\section {Functions, Variables and code Structure}
+In this section, we provide more details of all the functions and  the variables in this code. Also you can find a short description of the structure of the code  that might be helpful in understanding how to use this code.
+\subsection{Functions}
+\noindent\rule{14cm}{0.4pt}\\
+%%%%%%%%%%%%%
+% generateData
+{\bf \large generateData() } \\
+\noindent\rule{14cm}{0.4pt}\\
+{\bf Description}\\
+    Generate the data for clustering.\\
+    
+{\bf Usage}\\
+ 
+ generateData(type,...)
+\begin{Schunk}
+\begin{Sinput}
+>   #Default method:
+>   generateData(type, islandsIn =F , states= vectors(),
++                conFactor=1 )
+\end{Sinput}
+\end{Schunk}
+{\bf Arguments}
+\begin {itemize}
+\item type: three options dataTerr, dataFW, and dataTerrFW
+\item islandIn: if T the islands will be included
+\item states: a vector of states names that have to be included
+\item conFactor:  contiguity constraint factor
+\end {itemize}
+\hspace*{5mm}{\bf Returns}\\
+  a list with three elements: data, conMatrix, and latLong\\
+
+\noindent\rule{14cm}{0.4pt}\\
+%%%%%%%%%%%%%
+% kmeansU
+{\bf \large kmeansU() } \\
+\noindent\rule{14cm}{0.4pt}\\
+{\bf Description}\\
+    Perform k-means clustering on the U matrix.\\
+    
+{\bf Usage}\\
+ 
+ kmeansU(data,...)
+\begin{Schunk}
+\begin{Sinput}
+>   #Default method:
+>   kmeansU(data , cluster.number,
++           repetition = 400, iter.max = 400 )
+\end{Sinput}
+\end{Schunk}
+{\bf Arguments}
+\begin {itemize}
+\item data: numeric matrix U
+\item cluster.number: The number of clusters.
+\item iter.max: The maximum number of iterations allowed
+\item repetition: How many random sets should be chosen for as the initial centers
+\end {itemize}
+\hspace*{5mm}{\bf Returns}\\
+cluster: A vector of integers(from 1:cluster.number)
+indicating the cluster to which each point is allocated\\
+
+\noindent\rule{14cm}{0.4pt}\\
+%%%%%%%%%%%%%
+% mapping()
+{\bf \large mapping() } \\
+\noindent\rule{14cm}{0.4pt}\\
+{\bf Description}\\
+   Using map database to draw clusters on the US Map.
+{\bf Usage}\\
+
+
+\begin{Schunk}
+\begin{Sinput}
+>   #Default method:
+>   mapping(long, lat, clusters)
+\end{Sinput}
+\end{Schunk}
+{\bf Arguments}
+\begin {itemize}
+\item long: A numeric vector of  longitude location of the points.
+\item lat: A numeric vector of latitude location of the points.
+\item clusters: The  vector of integers indicating the cluster to which each point is allocated.
+  
+\end {itemize}
+ 
+\noindent\rule{14cm}{0.4pt}\\
+%%%%%%%%%%%%%
+% neighborMatrix()
+{\bf \large neighborMatrix()} \\
+\noindent\rule{14cm}{0.4pt}\\
+{\bf Description}\\
+    Compute contiguity Matrix 
+{\bf Usage}\\
+
+
+\begin{Schunk}
+\begin{Sinput}
+>   #Default method:
+>   neighborMatrix(NB,conFactor=1)
+\end{Sinput}
+\end{Schunk}
+{\bf Arguments}
+\begin {itemize}
+\item NB: The contiguity constraint data frame
+\item conFactor: contiguity constraint factor 
+\end {itemize}
+\hspace*{5mm}{\bf Returns}\\
+ conMatrix: Contiguity Matrix\\
+ 
+\noindent\rule{14cm}{0.4pt}\\
+%%%%%%%%%%%%%
+%outlierDetector()
+{\bf \large outlierDetector() } \\
+\noindent\rule{14cm}{0.4pt}\\
+{\bf Description}\\
+Compute the outlier of the data using Principal component.\\
+{\bf Usage}\\
+\begin{Schunk}
+\begin{Sinput}
+>   #Default method:
+>   outlierDetector(data, outlier.Threshold = 0.2 )
+\end{Sinput}
+\end{Schunk}
+{\bf Arguments}
+\begin {itemize}
+\item data: a numeric data frame or matrix
+\item outlier.Threshold: The Threshold which makes a data outlier. 
+\end {itemize}
+\hspace*{5mm}{\bf Returns}\\
+ outId: A logical vector which specifies all the outliers.\\
+ \noindent\rule{14cm}{0.4pt}\\
+%%%%%%%%%%%%%
+%prinComp()
+{\bf \large prinComp() } \\
+\noindent\rule{14cm}{0.4pt}\\
+{\bf Description}\\
+Run the principal component algorithm on the data to reduce dimension
+{\bf Usage}\\
+
+
+\begin{Schunk}
+\begin{Sinput}
+>   #Default method:
+>   prinComp(data, outId, showPC = F)
+\end{Sinput}
+\end{Schunk}
+{\bf Arguments}
+\begin {itemize}
+\item  data: a numeric data frame or matrix
+\item  outId: A logical vector which specifies all the outliers.
+\item  showPC: A logical value indicating whether  principal component should be return or not.
+\end {itemize}
+\hspace*{5mm}{\bf Returns}\\
+In case showPC is FALSE:\\
+\hspace*{5mm}dataNew: After Principal component data\\
+In case showPC is TRUE:\\
+\hspace*{5mm}PC: returns a list with class "prcomp", for more information look at prcomp function of R.\\
+
+\noindent\rule{14cm}{0.4pt}\\
+%%%%%%%%%%%%%
+%produceU()
+{\bf \large produceU()} \\
+\noindent\rule{14cm}{0.4pt}\\
+{\bf Description}\\
+Given n by n similarity this function first calculates the Laplacian matrix L
+  $$ d_{i,i}= \sum_{j=1}^{n} S_{i,j}$$
+  $$L= D^{-1}S$$
+Then generates n by 'ncol' matrix U of top 'ncol' eigenvectors of L. \\
+
+{\bf Usage}\\
+
+produceU(similarity, ncol ,...)
+\begin{Schunk}
+\begin{Sinput}
+> #Default method:
+> produceU(similarity, ncol , type=2, all.eig = F)
+\end{Sinput}
+\end{Schunk}
+{\bf Arguments}
+\begin {itemize}
+   \item similarity: an n by n matrix. 
+   \item ncol: number of columns of the output matrix U.
+   \item type: The algorithm that should be choose,Options are 1, 2, and 3.
+   \item  all.eig: a logical value indicating whether all the eigenvector should be compute or not.
+\end {itemize}    
+\hspace*{5mm}{\bf Returns}\\
+U: n by 'ncol' numeric matrix that contains the 'ncol' top eigenvectors of Laplacian matrix as column\\
+\noindent\rule{14cm}{0.4pt}\\
+%%%%%%%%%%%%%
+%similarity()
+{\bf \large similarity()} \\
+\noindent\rule{14cm}{0.4pt}\\
+
+{\bf Description}\\
+Compute similarity matrix. First
+$S_{i,j}= exp(\frac{dist(x_i,x_j)}{2\sigma ^2})$
+Where $x_i$ and $x_j$ are row $i$ and $j$ of the data matrix, and  $\sigma$ is median of pairwise distance.Then 
+$$S=S\circ S_c$$
+where $S_c$ is contiguity matrix. returns S.\\
+
+{\bf Usage}\\
+
+similarity(data, neighbors)\\
+
+{\bf Arguments}
+\begin {itemize}
+   \item data: n by p numeric matrix or data frame. 
+   \item neighbors: a square numeric matrix which specifies contiguity matrix.
+\end {itemize}    
+\hspace*{5mm}{\bf Returns}\\
+An n by n numeric matrix, that element[i,j] is the similarity index of observation i and observation j.\\ 
+
+\noindent\rule{14cm}{0.4pt}\\
+%%%%%%%%%%%%%
+%speCluster()
+{\bf \large speCluster()} \\
+\noindent\rule{14cm}{0.4pt}\\
+{\bf Description}\\
+Perform Spectral Clustering on a data matrix.\\
+{\bf Usage}\\
+
+speCluster(data,...)
+\begin{Schunk}
+\begin{Sinput}
+>   #Default method:
+>  speCluster(data, conMatrix, cluster.number, 
++             iter.max=400, repetition= 400 )
+\end{Sinput}
+\end{Schunk}
+{\bf Arguments}
+\begin {itemize}
+\item data: A numeric data frame or matrix.
+\item conMatrix: Contiguity matrix.
+\item cluster.number: The number of clusters.
+\item iter.max: The maximum number of iterations allowed for kmeans step. 
+\item repetition: How  many  random  sets  should  be  chosen for  as  the  initial centers in kmeans step.
+\end {itemize}
+\hspace*{5mm}{\bf Returns}\\
+ A list contains two parts:
+ \begin{itemize}
+ \item clusters: A vector of integers(from 1:cluster.number) indicating the cluster to which each point is allocated.
+ \item SS: A list with two values SSW for Sum Squared Within and SSB for Sum Squared Between
+ \end{itemize}
+ 
+ \noindent\rule{14cm}{0.4pt}\\
+%%%%%%%%%%%%%
+%stepOne()
+{\bf \large stepOne()} \\
+\noindent\rule{14cm}{0.4pt}\\
+{\bf Description}\\
+This function Computes the data after Principal component.\\
+{\bf Usage}\\
+
+stepOne(data,...)
+\begin{Schunk}
+\begin{Sinput}
+>   #Default method:
+>   stepOne(data, conMatrix, ncol)
+\end{Sinput}
+\end{Schunk}
+{\bf Arguments}
+\begin {itemize}
+\item data: A numeric data frame or matrix.
+\item conMatrix: Contiguity matrix.
+\item ncol: number of columns of the output matrix U
+ 
+\end {itemize}
+\hspace*{5mm}{\bf Returns}\\
+
+  A list contains two parts:
+\begin{itemize}
+  \item  dataAfterPC: After Principal component data
+  \item  U: n by ncol numeric matrix that contains the ncol tops eigenvectors of Laplacian matrix as column.
+\end{itemize}
+
+\noindent\rule{14cm}{0.4pt}\\
+%%%%%%%%%%%%%
+%stepTwo()
+{\bf \large stepTwo() } \\
+\noindent\rule{14cm}{0.4pt}\\
+{\bf Description}\\
+Perform Spectral Clustering on U matrix.\\
+
+{\bf Usage}\\
+
+stepTwo(data,...)
+\begin{Schunk}
+\begin{Sinput}
+>   #Default method:
+>   stepTwo(data, U, cluster.number= cluster.number,
++           iter.max=400, repetition=400)
+\end{Sinput}
+\end{Schunk}
+{\bf Arguments}
+\begin {itemize}
+\item data: A numeric data frame or matrix.
+\item U: A numeric matrix 
+\item cluster.number: The number of clusters.
+\item iter.max: The maximum number of iterations allowed for the kmeans step. 
+\item repetition: How  many  random  sets  should  be  chosen for  as  the  initial centers in kmeans step.
+\end {itemize}
+\hspace*{5mm}{\bf Returns}\\
+ A list contains two parts:
+ \begin{itemize}
+ \item clusters: A vector of integers(from 1:cluster.number) indicating the cluster to which each point is allocated.
+ \item SS: A list with two values SSW for Sum Squared Within and SSB for Sum Squared Between
+ \end{itemize}
+
+\noindent\rule{14cm}{0.4pt}\\
+%%%%%%%%%%%%%
+% sumSquared()
+{\bf \large sumSquares() } \\
+\noindent\rule{14cm}{0.4pt}\\
+{\bf Description}\\
+Given the data and clusters vector this function computes the between and within sum squared errors.\\
+
+{\bf Usage}\\
+
+\begin{Schunk}
+\begin{Sinput}
+>   #Default method:
+>   sumSquares(data, clusters)
+\end{Sinput}
+\end{Schunk}
+{\bf Arguments}
+\begin {itemize}
+\item data: After Principal component data  
+\item   clusters: The  vector of integers indicating the cluster to which each point is allocated.
+\end {itemize}
+\hspace*{5mm}{\bf Returns}\\
+
+ A list with two values SSW for Sum Squared Within and SSB for Sum Squared Between.\\
+\newpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection {code Structure}
+The code contains four files these files are designed base on the main steps of algorithm. 
+\begin {itemize}
+\item{\bf "Preprocess.R"} This file contains all the functions which are used in the preprocess part:
+\begin{enumerate}
+\item  neighborMatrix()
+\item  outlierDetector()
+\item  prinComp()
+\end{enumerate}
+
+\item{\bf "SpectralClustering.R"} This file contains all the functions that are used in the main part of spectral clustering algorithm 
+\begin{enumerate}
+\item  similarity()
+\item  produceU()
+\item  kmeansU()
+\end{enumerate}
+
+\item{\bf "Postprocess.R"} This file contains all the functions that are used for after clustering process
+\begin{enumerate}
+\item  sumSquares()
+\item  mapping()
+\end{enumerate}
+
+
+\item {\bf "main.R"} This is the main file of this code which should be called for using the code functions, the following functions are in this file 
+\begin{enumerate}
+\item  speCluster()
+\item  stepOne()
+\item  stepTwo()
+\end{enumerate}
+\item {\bf "GenerateHU12.R"} The code for generating HU12SpectralClustering.RData file. It also include the generateData() function.
+\end {itemize}
+
+\end{document}

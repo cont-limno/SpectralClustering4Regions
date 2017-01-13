@@ -20,7 +20,7 @@ install.packages("RColorBrewer")
 install.packages("maptools")
 @
 Although you only have to install the packages once, you will need to load them every time you want to use this code. Use the following code to load the packages.\footnote{The file "example.R" contains the code in this document.}
-<<>>=
+<<eval=FALSE>>=
 # First Load the necessary packages 
 library("Matrix")
 library("geigen")
