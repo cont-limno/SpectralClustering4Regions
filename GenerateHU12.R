@@ -1,5 +1,3 @@
-setwd("C:\\Users\\FWL\\Dropbox\\Summer 2015\\Job\\Spectral Clustering")
-setwd("/Users/farzan/Desktop/Dropbox/Summer\ 2015/Job/Spectral\ Clustering")
 ###############################################
 #load spectral clustering functions
 source("main.R")
