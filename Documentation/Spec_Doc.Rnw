@@ -33,7 +33,7 @@ library("maptools")
 The next step is setting your working directory to be the folder that contains the code and data. In order to use the functions and methods in this code you also need to call main.R file using source() command as follow.
 
 <<eval=FALSE>>=
-# Second load spectral clustering file
+# Second load spectral clustering code
 source("main.R")
 @
 
@@ -130,7 +130,7 @@ input <- generateData(type= dataTerrFW, islandsIn = F,
 <<eval=FALSE>>=
 # 1.a ... 3.a using speCluster and stor the result in the results variable
 results <- speCluster(data= input$data, conMatrix= 
-                        input$coMatrix, cluster.number=10)
+                        input$conMatrix, cluster.number=10)
 summary(results)
 results$SS
 results$clusters
