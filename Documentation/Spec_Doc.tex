@@ -39,8 +39,7 @@ The next step is setting your working directory to be the folder that contains t
 
 \begin{Schunk}
 \begin{Sinput}
-> # Second Step set working Directory and load spectral clustering file
-> setwd("C:\\Users\\FWL\\Dropbox\\Summer 2015\\Job\\Spectral Clustering")
+> # Second load spectral clustering code
 > source("main.R")
 \end{Sinput}
 \end{Schunk}
@@ -145,11 +144,11 @@ Now we can explain the three approachs we introduced above. Lets get back to our
 \begin{Sinput}
 > # 1.a ... 3.a using speCluster and stor the result in the results variable
 > results <- speCluster(data= input$data, conMatrix= 
-+                         input$coMatrix, cluster.number=10)
++                         input$conMatrix, cluster.number=10)
 > summary(results)
 > results$SS
 > results$clusters
-> mapping( lat = input$latLong[,1],long=input$latLong[,2],
+> mapping(lat = input$latLong[,1],long=input$latLong[,2],
 +          clusters= results$clusters)
 \end{Sinput}
 \end{Schunk}
@@ -172,13 +171,16 @@ If you look at the steps 2.c and 2.d of the above algorithm, you can notice that
 > results2$SS
 > mapping( lat = input$latLong[,1], long = input$latLong[,2],
 +          clusters= results2$clusters)
+> 
 > # since the U matrix has 20 column we can to clustering up
 > # to 20 clusters using output of stepOne function
-> results22 <-  stepTwo(data= input$dataAfterPC, U = input$U,
-+                        cluster.number=20)
-> results22$SS
-> mapping( lat = input$latLong[,1], long = input$latLong[,2],
-+          clusters= results22$clusters)
+> 
+> # these inputs (dataAfterPC and U) have not been generated yet - jsta
+> # results22 <-  stepTwo(data= input$dataAfterPC, U = input$U,
+> #                        cluster.number=20)
+> # results22$SS
+> # mapping( lat = input$latLong[,1], long = input$latLong[,2],
+> #          clusters= results22$clusters)
 > 
 \end{Sinput}
 \end{Schunk}
@@ -203,11 +205,11 @@ If you look at the steps 2.c and 2.d of the above algorithm, you can notice that
 > ############################################
 > # Spectral clustering Algorithm
 > similarity <- similarity(data = dataAfterPC, 
-+                          neighbors=conMatrix)
++                          neighbors=input$conMatrix)
 > U <- produceU( similarity= similarity, ncol=20)
 > clusters <- kmeansU(data=U, cluster.number = 10)
 > ############################################
-> # Resutls
+> # Results
 > SS <- sumSquares(data=dataAfterPC, clusters= clusters)
 > SS
 > mapping( lat = input$latLong[,1],long=input$latLong[,2], clusters= clusters)
