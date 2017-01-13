@@ -1,5 +1,10 @@
 # Spectral Clustering Code for Cheruvelil et al. 
 
-## Get data 
-from the LTER data portal
+## Data 
+
+Get data from the LTER data portal...
+
+## Documentation 
+
+See the Documentation pdf
 
