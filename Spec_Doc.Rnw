@@ -20,7 +20,7 @@ install.packages("RColorBrewer")
 install.packages("maptools")
 @
 Although you only have to install the packages once, you will need to load them every time you want to use this code. Use the following code to load the packages.\footnote{The file "example.R" contains the code in this document.}
-<<eval=FALSE>>=
+<<>>=
 # First Load the necessary packages 
 library("Matrix")
 library("geigen")
@@ -32,8 +32,14 @@ library("maptools")
 @
 The next step is setting your working directory to be the folder that contains the code and data. In order to use the functions and methods in this code you also need to call main.R file using source() command as follow.
 
-<<eval=FALSE>>=
-# Second load spectral clustering code
+<<>>=
+getwd()
+plot(1)
+@
+
+<<>>=
+# Second generate data objects and load spectral clustering code
+source("GenerateHU12.R")
 source("main.R")
 @
 
@@ -51,13 +57,13 @@ Like any other algorithm, spectral clustering needs some variable as input. Whic
 \end{itemize}
 We can read the HU12 data by loading {\bf HU12SpectralClustering.RData} file. This file contains dataTerr, dataFW, and dataTerrFw as three option of data, latLong18876 which is the location of each observation on Map, and NB18876 the contiguity constraint data frame that can be used to build the conMatrix.
 
-<<eval=FALSE>>=
+<<>>=
 #Loading Data
 load("HU12SpectralClustering.RData")
 @
 After loading the Hu12SpectralClustering.RData, you can generate the input data for spectral clustering algorithm by calling generateData() function\footnote{For description of functions look at section 3.1 in this document}. For the sake of clarity we do a toy example in this document. Let consider we are interseted in Missouri state dataTerrFW's data.
 
-<<eval=FALSE>>=
+<<>>=
 # generate the input when we restrict the
 # data to dataTerrFW's of state Missouri, 
 # and no islands inculded.
@@ -127,13 +133,13 @@ input <- generateData(type= dataTerrFW, islandsIn = F,
 
 \end{itemize}
 %\end{singlespace}
-<<eval=FALSE>>=
+<<fig=TRUE>>=
 # 1.a ... 3.a using speCluster and stor the result in the results variable
 results <- speCluster(data= input$data, conMatrix= 
                         input$conMatrix, cluster.number=10)
 summary(results)
 results$SS
-results$clusters
+head(results$clusters)
 mapping(lat = input$latLong[,1],long=input$latLong[,2],
          clusters= results$clusters)
 @
@@ -145,7 +151,7 @@ If you look at the steps 2.c and 2.d of the above algorithm, you can notice that
 \item {\bf 2.d... 3.a } using stepTwo() function.
 \item {\bf 3.b} plot the results using mapping function\\
 \end{itemize}
-<<eval=FALSE>>=
+<<fig=TRUE>>=
 # example.2. Two steps
 results1 <- stepOne(input$data, conMatrix= input$conMatrix,ncol=20)
 summary(results1)
@@ -179,7 +185,7 @@ mapping( lat = input$latLong[,1], long = input$latLong[,2],
 \item {\bf 3.a} Evaluate the between and within sum squired error using sumSquares() function.\\
 \item {\bf 3.b} plot the results using mapping() function.\\
 \end{itemize}
-<<eval=FALSE>>=
+<<fig=TRUE>>=
 #Preprocess
 
 outId <-outlierDetector( input$data )

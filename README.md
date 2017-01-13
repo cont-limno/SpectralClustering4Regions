@@ -10,9 +10,7 @@ Get data from the LTER data portal and unzip to the same directory as the code. 
 * IslandIdx.csv
 * latLong18876.csv
 
-
-
 ## Documentation 
 
-See the Documentation pdf
+See the pdf in the Documentation folder
 
