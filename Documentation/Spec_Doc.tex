@@ -1,0 +1,30 @@
+\documentclass{article}
+\usepackage{color}
+\author{Farzan Masrour}
+\title{Tutorial on How to use Spectral Clustering Algorithm for Creating Regions from Geospatial Data}
+\usepackage{Sweave}
+\begin{document}
+\input{Spec_Doc-concordance}
+\newcommand{\todo}[1] {{\textcolor{red}{\noindent ToDo: #1}\newline}}
+\maketitle
+This document describes how to use the Spectral Clustering method de- scribed by Cheruvelil et al.This tutorial uses the program {\color{blue}R}.
+
+\section {preparation}
+Before you can use this code you need to install the following packages: Matrix, geigen, rARPACK, maps, WDI, RColorBrewer, and maptools. Note that the R packages maps, WDI, RColorBrewer, maptools are only required for plotting the clustering results. To install these packages, use the following commands in R.
+\begin{Schunk}
+\begin{Sinput}
+> install.packages("Matrix")
+> install.packages("geigen")
+> install.packages("rARPACK")
+> install.packages("maps")
+> install.packages("WDI")
+> install.packages("RColorBrewer")
+> install.packages("maptools")
+\end{Sinput}
+\end{Schunk}
+Although you only have to install the packages once, you will need to load them every time you want to use this code. Use the following code to load the packages.\footnote{The file "example.R" contains the code in this document.}
+\begin{Schunk}
+\begin{Sinput}
+> # First Load the necessary packages 
+> library("Matrix")
+> library("geigen")
