@@ -2,15 +2,13 @@
 
 ## Data 
 
-Get data from the LTER data portal and unzip to the same directory as the code. It should include the following files:
+The data required to run the example code is in the `data` folder. It is mirrored on the LTER data store at:
 
-* terrData.csv
-* freshData.csv
-* NB_18876.csv
-* IslandIdx.csv
-* latLong18876.csv
+## Documentation and Examples
 
-## Documentation 
+See `Spec_Doc.pdf` file
 
-See the pdf in the Documentation folder
+## References
+
+
 
