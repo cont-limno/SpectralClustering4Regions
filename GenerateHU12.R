@@ -3,13 +3,13 @@
 source("main.R")
 ###############################################
 # Read data
-dataTerr <- read.csv("terrData.csv", header=T)
-dataFW <- read.csv("freshData.csv", header=T)
+dataTerr <- read.csv("data/terrData.csv", header=T)
+dataFW <- read.csv("data/freshData.csv", header=T)
 i <- which(colnames(dataFW)=="hu12_states")
 dataTerrFW <- merge(dataTerr, dataFW[-i], by.x="zoneid", by.y="zoneid")
-NB18876 <- read.csv("NB_18876.csv", header=T)
-islands <- read.csv("islandIdx.csv", header=T)
-latLong18876 <- read.csv("latLong18876.csv", header=T)
+NB18876 <- read.csv("data/NB_18876.csv", header=T)
+islands <- read.csv("data/islandIdx.csv", header=T)
+latLong18876 <- read.csv("data/latLong18876.csv", header=T)
 
 rm(i)
 ##################################################
