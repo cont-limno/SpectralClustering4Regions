@@ -1,8 +1,10 @@
 \documentclass{article}
 \usepackage{color}
-\author{Farzan Masrour}
+\author{Farzan Masrour\
+        \and Joseph Stachelek}
 \title{Tutorial on How to use Spectral Clustering Algorithm for Creating Regions from Geospatial Data}
 \begin{document}
+\date{2015-09-16 edited 2017-01-20}
 \SweaveOpts{concordance=TRUE}
 \newcommand{\todo}[1] {{\textcolor{red}{\noindent ToDo: #1}\newline}}
 \maketitle
@@ -62,7 +64,7 @@ After loading the Hu12SpectralClustering.RData, you can generate the input data 
 # generate the input when we restrict the
 # data to dataTerrFW's of state Missouri, 
 # and no islands inculded.
-input <- generateData(type= dataTerrFW, islandsIn = F,
+input <- generateData(type = dataTerrFW, islandsIn = F,
                     states = c("MO"),conFactor=1)
 @
 In the above example we stored the output of generateData() in a variable called input.
@@ -156,17 +158,6 @@ summary(results2)
 results2$SS
 mapping( lat = input$latLong[,1], long = input$latLong[,2],
          clusters= results2$clusters)
-
-# since the U matrix has 20 column we can to clustering up
-# to 20 clusters using output of stepOne function
-
-# these inputs (dataAfterPC and U) have not been generated yet - jsta
-# results22 <-  stepTwo(data= input$dataAfterPC, U = input$U,
-#                        cluster.number=20)
-# results22$SS
-# mapping( lat = input$latLong[,1], long = input$latLong[,2],
-#          clusters= results22$clusters)
-
 @
 
 
