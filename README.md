@@ -6,7 +6,7 @@ The data required to run the example code is in the `data` folder. It is mirrore
 
 ## Documentation and Examples
 
-See `Spec_Doc.pdf` file
+See the [Spec_Doc.pdf](https://github.com/cont-limno/SpectralClustering4Regions/blob/master/Spec_Doc.pdf) file
 
 ## Citation
 
