@@ -1,4 +1,4 @@
-# Spectral Clustering Code for Cheruvelil et al. (submitted)
+# Spectral Clustering Code for _Creating Multithemed Ecological Regions for Macroscale Ecology_ [Cheruvelil et al. 2017](https://dx.doi.org/10.1002/ece3.2884)
 
 ## Data 
 
