@@ -1,8 +1,9 @@
-# Spectral Clustering Code for _Creating Multithemed Ecological Regions for Macroscale Ecology_ [Cheruvelil et al. 2017](https://dx.doi.org/10.1002/ece3.2884)
+# Spectral Clustering Code for _Creating Multithemed Ecological Regions for Macroscale Ecology_ ([Cheruvelil et al. 2017](https://dx.doi.org/10.1002/ece3.2884))
 
 ## Data 
 
 The data required to run the example code is in the `data` folder. It is mirrored on the LTER data store at:
+
 http://dx.doi.org/10.6073/pasta/1532a9a0c023fa50a912021291c8fc1f
 
 ## Documentation and Examples
