@@ -2,7 +2,8 @@
 
 ## Data 
 
-The data required to run the example code is in the `data` folder. It is mirrored on the LTER data store at: http://dx.doi.org/10.6073/pasta/1532a9a0c023fa50a912021291c8fc1f
+The data required to run the example code is in the `data` folder. It is mirrored on the LTER data store at:
+http://dx.doi.org/10.6073/pasta/1532a9a0c023fa50a912021291c8fc1f
 
 ## Documentation and Examples
 
