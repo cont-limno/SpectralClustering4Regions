@@ -10,7 +10,7 @@ http://dx.doi.org/10.6073/pasta/1532a9a0c023fa50a912021291c8fc1f
 
 See the [Spec_Doc.pdf](https://github.com/cont-limno/SpectralClustering4Regions/blob/master/Spec_Doc.pdf) file.
 
-See https://github.com/jsta/speCluster for an installable R package implementation of this code.
+See https://github.com/cont-limno/speCluster for an installable R package implementation of this code.
 
 ## Citation
 
