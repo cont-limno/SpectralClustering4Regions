@@ -1,7 +1,7 @@
 \documentclass{article}
 \usepackage{color}
 \author{Farzan Masrour\
-        \and Joseph Stachelek}
+        \and Jemma Stachelek}
 \title{Tutorial on How to use Spectral Clustering Algorithm for Creating Regions from Geospatial Data}
 \begin{document}
 \date{2015-09-16 edited 2017-01-20}
